@@ -1,0 +1,425 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+
+    <title>Online Examination</title>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css"
+          rel="stylesheet">
+
+    <style>
+
+        body{
+            background:url('https://images.unsplash.com/photo-1484417894907-623942c8ee29?q=80&w=1600&auto=format&fit=crop') center/cover fixed;
+            font-family:Arial;
+        }
+
+        .card{
+            background:rgba(255,255,255,0.96);
+            border-radius:20px;
+            border:none;
+        }
+
+        .question-box{
+            padding:15px;
+            border-radius:15px;
+            transition:0.3s;
+            margin-bottom:20px;
+            border:1px solid #ddd;
+        }
+
+        .question-box:hover{
+            background:#f8f9fa;
+            transform:scale(1.01);
+        }
+
+        .navbar{
+            box-shadow:0px 2px 10px rgba(0,0,0,0.3);
+        }
+
+        .timer-box{
+            background:red;
+            color:white;
+            padding:8px 15px;
+            border-radius:10px;
+            font-weight:bold;
+        }
+
+        .option{
+            padding:5px;
+            border-radius:5px;
+        }
+
+        .option:hover{
+            background:#e9ecef;
+        }
+
+        .submit-btn{
+            font-size:20px;
+            padding:12px;
+            border-radius:10px;
+        }
+
+        .top-buttons a{
+            margin-left:10px;
+        }
+
+    </style>
+
+</head>
+
+<body onload="startExam()">
+
+<nav class="navbar navbar-dark bg-primary px-4">
+
+    <span class="navbar-brand fs-4">
+        Online Examination System
+    </span>
+
+    <div class="d-flex align-items-center top-buttons">
+
+        <a href="/dashboard"
+           class="btn btn-light">
+
+            Dashboard
+
+        </a>
+
+        <a href="/leaderboard"
+           class="btn btn-warning">
+
+            Leaderboard
+
+        </a>
+
+        <a href="/logout"
+           class="btn btn-danger">
+
+            Logout
+
+        </a>
+
+        <div class="timer-box ms-3">
+
+            Time Left:
+            <span id="timer"></span>
+
+        </div>
+
+    </div>
+
+</nav>
+
+<div class="container mt-4 mb-5">
+
+    <div class="card shadow-lg p-4">
+
+        <h2 class="text-center mb-4">
+
+            Java Programming MCQ Test
+
+        </h2>
+
+        <form id="examForm">
+
+            <div class="row">
+
+                <div class="col-md-6 mb-3">
+
+                    <input type="text"
+                           id="studentName"
+                           class="form-control"
+                           placeholder="Enter Your Name"
+                           required>
+
+                </div>
+
+                <div class="col-md-6 mb-3">
+
+                    <input type="email"
+                           id="studentEmail"
+                           class="form-control"
+                           placeholder="Enter Your Email"
+                           required>
+
+                </div>
+
+            </div>
+
+            <div id="questionsContainer"></div>
+
+            <button type="button"
+                    onclick="submitExam()"
+                    class="btn btn-success w-100 mt-4 submit-btn">
+
+                Submit Examination
+
+            </button>
+
+        </form>
+
+    </div>
+
+</div>
+
+<script>
+
+let timeLeft = 300;
+
+const questions = [
+
+{
+q:"What is Java?",
+options:["Programming Language","Browser","Database","Operating System"],
+answer:"Programming Language"
+},
+
+{
+q:"Which framework is used with Java?",
+options:["Spring Boot","Laravel","Django","React"],
+answer:"Spring Boot"
+},
+
+{
+q:"Which keyword creates object?",
+options:["new","create","make","class"],
+answer:"new"
+},
+
+{
+q:"HTML stands for?",
+options:["Hyper Text Markup Language","High Transfer Machine Language","Home Tool Markup Language","Hyperlinks Mark Language"],
+answer:"Hyper Text Markup Language"
+},
+
+{
+q:"CSS is used for?",
+options:["Styling","Database","Server","Compiler"],
+answer:"Styling"
+},
+
+{
+q:"Which is not a programming language?",
+options:["HTML","Java","Python","C++"],
+answer:"HTML"
+},
+
+{
+q:"Which company developed Java?",
+options:["Sun Microsystems","Google","Microsoft","IBM"],
+answer:"Sun Microsystems"
+},
+
+{
+q:"Java is ___ language",
+options:["Object Oriented","Markup","Assembly","Machine"],
+answer:"Object Oriented"
+},
+
+{
+q:"Which symbol ends Java statement?",
+options:[";","?",":","!"],
+answer:";"
+},
+
+{
+q:"Bootstrap is used for?",
+options:["Responsive Design","Gaming","Database","AI"],
+answer:"Responsive Design"
+}
+
+];
+
+function shuffle(array){
+
+    return array.sort(() => Math.random() - 0.5);
+
+}
+
+function startExam(){
+
+    startTimer();
+
+    loadQuestions();
+
+}
+
+function loadQuestions(){
+
+    const randomQuestions =
+        shuffle(questions).slice(0,5);
+
+    localStorage.setItem(
+        "examQuestions",
+        JSON.stringify(randomQuestions)
+    );
+
+    const container =
+        document.getElementById("questionsContainer");
+
+    container.innerHTML = "";
+
+    randomQuestions.forEach((item,index)=>{
+
+        let html = `
+
+        <div class='question-box shadow-sm'>
+
+            <h5 class='mb-3'>
+
+                ${index+1}. ${item.q}
+
+            </h5>
+
+        `;
+
+        item.options.forEach(opt=>{
+
+            html += `
+
+            <div class='form-check option'>
+
+                <input class='form-check-input'
+                       type='radio'
+                       name='q${index}'
+                       value='${opt}'>
+
+                <label class='form-check-label'>
+
+                    ${opt}
+
+                </label>
+
+            </div>
+
+            `;
+
+        });
+
+        html += `</div>`;
+
+        container.innerHTML += html;
+
+    });
+
+}
+
+function startTimer(){
+
+    const timer =
+        document.getElementById("timer");
+
+    const interval = setInterval(()=>{
+
+        let minutes =
+            Math.floor(timeLeft/60);
+
+        let seconds =
+            timeLeft % 60;
+
+        timer.innerHTML =
+            minutes + ":" +
+            (seconds < 10 ? "0":"") + seconds;
+
+        timeLeft--;
+
+        if(timeLeft < 0){
+
+            clearInterval(interval);
+
+            alert("Time Over! Exam Submitted Automatically.");
+
+            submitExam();
+
+        }
+
+    },1000);
+
+}
+
+function submitExam(){
+
+    const name =
+        document.getElementById("studentName").value;
+
+    const email =
+        document.getElementById("studentEmail").value;
+
+    if(name === "" || email === ""){
+
+        alert("Please enter name and email");
+
+        return;
+
+    }
+
+    const qs =
+        JSON.parse(localStorage.getItem("examQuestions"));
+
+    let score = 0;
+
+    qs.forEach((item,index)=>{
+
+        const selected =
+            document.querySelector(
+                `input[name="q${index}"]:checked`
+            );
+
+        if(selected &&
+           selected.value === item.answer){
+
+            score++;
+
+        }
+
+    });
+
+    fetch("/save",{
+
+        method:"POST",
+
+        headers:{
+            "Content-Type":
+            "application/x-www-form-urlencoded"
+        },
+
+        body:
+        `name=${name}&email=${email}&score=${score}`
+
+    })
+
+    .then(response => response.text())
+
+    .then(data => {
+
+        localStorage.setItem("studentName",name);
+
+        localStorage.setItem("score",score);
+
+        localStorage.setItem("total",qs.length);
+
+        alert(
+            "Exam Submitted Successfully!\nYour Score: "
+            + score + "/" + qs.length
+        );
+
+        window.location.href="/result";
+
+    })
+
+    .catch(error => {
+
+        console.log(error);
+
+        alert("Error Saving Result");
+
+    });
+
+}
+
+</script>
+
+</body>
+
+</html>
